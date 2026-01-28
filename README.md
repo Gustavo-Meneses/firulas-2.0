@@ -30,21 +30,20 @@ O projeto utiliza o melhor das ferramentas externas para alimentar o motor de re
 Se preferir rodar em sua máquina, siga os passos:
 
 1. **Clone o repositório**:
-   ```bash
+  
    git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
    cd seu-repositorio
 
 
 
 2. **Instale as dependências**:
-```bash
+
 pip install -r requirements.txt
 
-```
 
 
 3. **Execute o App**:
-```bash
+
 streamlit run app.py
 
 ```
