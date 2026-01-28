@@ -31,7 +31,7 @@ Se preferir rodar em sua máquina, siga os passos:
 
 1. **Clone o repositório**:
   
-   git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
+git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/seu-usuario/seu-repositorio.git)
    cd seu-repositorio
 
 
