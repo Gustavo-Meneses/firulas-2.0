@@ -1,4 +1,4 @@
 moviepy==1.0.3
-Pillow
+Pillow>=10.0.0
 numpy
 streamlit
