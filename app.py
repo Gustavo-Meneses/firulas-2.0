@@ -29,7 +29,7 @@ def apply_synthwave_filter(pil_img):
     return pil_img
 
 def glitch_effect(get_frame, t):
-    """Efeito de distorção de cor (RGB Shift)."""
+    """Efeito de distorção de cor (RGB Shift) estilo VHS."""
     frame = get_frame(t)
     frame_glitch = frame.copy()
     shift = int(6 * np.sin(t * 12))
@@ -56,18 +56,19 @@ with col2:
 with col3:
     st.subheader("3. Áudio 8D/Reverb")
     st.link_button("Ir para AudioAlter.com", "https://audioalter.com")
-    audio_file = st.file_uploader("Upload da Trilha", type=['mp3', 'wav'], key="audio")
+    # Adicionado suporte para .ogg aqui
+    audio_file = st.file_uploader("Upload da Trilha", type=['mp3', 'wav', 'ogg'], key="audio")
 
 st.divider()
 
-# CONFIGURAÇÕES FINAIS
+# CONFIGURAÇÕES FINAIS NA SIDEBAR
 st.sidebar.header("🎛️ Ajustes de Vibe")
 duration = st.sidebar.slider("Duração do Post (seg)", 5, 15, 10)
 zoom_speed = st.sidebar.slider("Intensidade do Zoom", 0.01, 0.10, 0.03)
 
 if st.button("🚀 RENDERIZAR VIBE FINAL", use_container_width=True):
     if bg_file and logo_file and audio_file:
-        with st.spinner("Sintonizando frequências neon..."):
+        with st.spinner("Sintonizando frequências neon e processando áudio..."):
             try:
                 # Processamento de arquivos temporários
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_bg:
@@ -80,45 +81,60 @@ if st.button("🚀 RENDERIZAR VIBE FINAL", use_container_width=True):
                     tmp_logo.write(logo_file.getvalue())
                     logo_path = tmp_logo.name
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_audio:
+                # Captura a extensão original do áudio para evitar erros de codec
+                audio_ext = "." + audio_file.name.split(".")[-1]
+                with tempfile.NamedTemporaryFile(delete=False, suffix=audio_ext) as tmp_audio:
                     tmp_audio.write(audio_file.getvalue())
                     audio_path = tmp_audio.name
 
-                # Montagem do Vídeo
+                # 1. Montagem do Background com Zoom
                 bg_clip = (ImageClip(bg_path)
                            .set_duration(duration)
                            .resize(height=1920)
                            .set_position('center')
                            .fx(vfx.resize, lambda t: 1 + zoom_speed * t))
 
+                # 2. Logo Centralizado
                 logo_clip = (ImageClip(logo_path)
                              .set_duration(duration)
                              .resize(width=500)
                              .set_position(('center', 'center')))
 
+                # 3. Processamento do Áudio (Suporta MP3, WAV, OGG)
                 audio = AudioFileClip(audio_path).subclip(0, duration)
 
+                # 4. Compositor Final com Efeito Glitch
                 video = CompositeVideoClip([bg_clip, logo_clip], size=(1080, 1920))
                 video = video.fl(glitch_effect)
                 video = video.set_audio(audio)
 
-                output_filename = "synthwave_vibe.mp4"
-                video.write_videofile(output_filename, fps=24, codec="libx264", audio_codec="aac", remove_temp=True)
+                # Nome do arquivo final
+                output_filename = "synthwave_vibe_final.mp4"
+                
+                # Exportação
+                video.write_videofile(
+                    output_filename, 
+                    fps=24, 
+                    codec="libx264", 
+                    audio_codec="aac", 
+                    remove_temp=True
+                )
 
-                st.success("✨ Masterização Concluída!")
+                st.success("✨ Post Masterizado com Sucesso!")
                 st.video(output_filename)
                 
                 with open(output_filename, "rb") as f:
-                    st.download_button("💾 Baixar para Instagram/TikTok", f, file_name=output_filename)
+                    st.download_button("💾 Baixar Vídeo (9:16)", f, file_name=output_filename)
 
-                # Cleanup
+                # Cleanup dos arquivos temporários
                 os.remove(bg_path)
                 os.remove(logo_path)
                 os.remove(audio_path)
 
             except Exception as e:
                 st.error(f"Erro no processamento: {e}")
+                st.info("Dica: Se o erro for de codec, tente converter o áudio para MP3 no AudioAlter.")
     else:
-        st.error("Ops! Você precisa carregar os 3 arquivos para prosseguir.")
+        st.error("Ops! Você precisa carregar os 3 arquivos (Imagem, Logo e Áudio) para prosseguir.")
 
-st.info("💡 Dica: No Recraft, use o estilo 'Glow' ou 'Synthwave' para melhores resultados.")
+st.info("💡 Pro Tip: Arquivos .OGG costumam ter melhor qualidade para loops Synthwave.")
